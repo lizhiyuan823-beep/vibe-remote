@@ -4,7 +4,18 @@
 use super::applescript;
 
 pub const APPROVE_WORDS: &[&str] = &["approve", "allow", "confirm", "accept", "批准", "允许", "确认"];
-pub const REJECT_WORDS: &[&str] = &["reject", "decline", "deny", "cancel", "拒绝", "取消"];
+pub const REJECT_WORDS: &[&str] = &[
+    "reject",
+    "decline",
+    "deny",
+    "don't allow",
+    "do not allow",
+    "not now",
+    "cancel",
+    "不允许",
+    "拒绝",
+    "取消",
+];
 /// 「全部允许」的按钮文案变体；WorkBuddy 改文案时在这里补
 pub const APPROVE_ALL_WORDS: &[&str] = &[
     "全部允许",
@@ -46,10 +57,18 @@ fn build_script(words: &[&str]) -> String {
 							set n to name of el
 							if n is not missing value then
 								repeat with kw in {{{keywords}}}
-									if n contains (kw as string) then
-										click el
-										return "clicked:" & n
-									end if
+							if n is (kw as string) then
+								click el
+								return "clicked:" & n
+							end if
+						end repeat
+						-- Exact matches win so “允许” never prefers “始终允许”.
+						repeat with kw in {{{keywords}}}
+							if (my lower of n) contains (my lower of (kw as string)) then
+								click el
+								return "clicked:" & n
+							end if
+						end repeat
 								end repeat
 							end if
 						end if
